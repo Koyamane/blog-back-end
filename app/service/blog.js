@@ -36,8 +36,11 @@ class UserService extends BaseService {
       return Promise.reject(new MyError('单个标签长度不能大于20', 400));
     }
 
-    await this.document.create(params);
-    return '新增成功';
+    const data = await this.document.create(params);
+    return {
+      id: data.id,
+      msg: '新增成功',
+    };
   }
 
   async deleteBlog(defaultParams) {
@@ -86,13 +89,13 @@ class UserService extends BaseService {
   }
 
   async somebodyBlogList(defaultParams) {
-    const { userId } = { ...defaultParams, ...this.ctx.params };
+    const { userId } = { ...this.ctx.params };
 
     if (!userId) {
       return Promise.reject(new MyError('未找到用户', 400));
     }
 
-    return this.queryPage({ dto: { createdId: userId } });
+    return this.queryPage({ ...defaultParams, dto: { createdId: userId } });
   }
 }
 

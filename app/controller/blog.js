@@ -5,7 +5,7 @@ const Controller = require('egg').Controller;
 class BlogController extends Controller {
   async blogList() {
     const { ctx } = this;
-    await ctx.returnService(ctx.service.blog.queryBlogPage({ sort: { createdDate: -1 } }));
+    await ctx.returnService(ctx.service.blog.queryBlogPage({ sort: { updateDate: -1 } }));
   }
 
   async addBlog() {
@@ -37,7 +37,7 @@ class BlogController extends Controller {
 
   async somebodyBlogList() {
     const { ctx } = this;
-    await ctx.returnService(ctx.service.blog.somebodyBlogList());
+    await ctx.returnService(ctx.service.blog.somebodyBlogList({ sort: { updateDate: -1 } }));
   }
 }
 
