@@ -11,6 +11,7 @@ module.exports = app => {
         require: true,
         default: () => app.createUuid(6, 10), // 用函数的方法，就不会每次都是固定值了
       },
+      createdUser: { type: String, default: '' },
       createdName: { type: String, default: '' },
       createdId: { type: String, default: '' },
       createdAvatar: { type: String, default: '' },

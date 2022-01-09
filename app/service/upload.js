@@ -27,21 +27,14 @@ class UserService extends BaseService {
     const filename = 'avatar/avatar_' + Date.now() + '.' + fileType || stream.filename.toLowerCase();
 
     // 上传
-    await cos.putObject({
+    const res = await cos.putObject({
       Bucket: 'yamanesi-1258339807',
       Region: 'ap-guangzhou',
       Key: filename,
       Body: stream, // 上传文件对象
     });
 
-    // 获取地址
-    const imgUrl = await cos.getObjectUrl({
-      Bucket: 'yamanesi-1258339807',
-      Region: 'ap-guangzhou',
-      Key: filename, // 传到avatar文件夹下面
-      Sign: true, /* 获取带签名的对象URL */
-    });
-    const avatarUrl = imgUrl + (imgUrl.indexOf('?') > -1 ? '&' : '?') + 'response-content-disposition=attachment'; // 补充强制下载的参数
+    const avatarUrl = 'https://' + res.Location;
     const userInfo = await ctx.getCurrentUserInfo();
     const preAvatar = userInfo.avatar.split('?')[0].replace(/.*\//, '');
 

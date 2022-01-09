@@ -15,6 +15,7 @@ class BlogController extends Controller {
     await ctx.returnService(ctx.service.blog.addBlog({
       createdAvatar: userInfo.avatar,
       createdName: userInfo.nickname,
+      createdUser: userInfo.username,
       createdId: userInfo.userId,
     }));
   }

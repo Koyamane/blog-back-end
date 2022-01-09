@@ -77,7 +77,6 @@ class UserService extends BaseService {
       username: params.username,
       password: params.password,
       nickname: params.username,
-      avatar: 'https://yamanesi-1258339807.cos.ap-guangzhou.myqcloud.com/avatar%2Fdefault_avatar.png?q-sign-algorithm=sha1&q-ak=AKID1h-9r4qi7EqiBcN68wCv3clM9S7B4y9pwb6cVz6LdgrFwlBwQaCG5RW6uhO8zyKa&q-sign-time=1641546762;1641550362&q-key-time=1641546762;1641550362&q-header-list=&q-url-param-list=&q-signature=3cb964b57a44f9cc01581b1634f838205aea23bb&x-cos-security-token=9bPq270tt0IfyyoJtuPPvZeAO3P17MMaa2ab203e9d953ec654bbda7c4a9237afa9lRLC2-5v4-ze1CJjHIHxoi-SLqpsM87zmHNvmfPxoh-FJj9r56ZsLaj7RwgY-9rakS571LDYnl_eXM1xKlRQWXkgs68N6bzZCIew6W-rAI5NTx3jIT5SerJ-RMSI42NZdr-OUytTdayW16jPlINSOUDaXsg9SfZ0lZJpiVUtLu5vRi-k_1Rj9gpu-qTc1x',
     });
 
     const token = app.jwt.sign(

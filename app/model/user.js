@@ -18,8 +18,7 @@ module.exports = app => {
       nickname: { type: String, trim: true, default: '' },
       avatar: {
         type: String,
-        // 因为这里的ctx.origin拿的都是127.0.0.1地址，不能设默认值
-        default: '',
+        default: 'https://yamanesi-1258339807.cos.ap-guangzhou.myqcloud.com/avatar%2Fdefault_avatar.png',
       },
       post: { type: String, trim: true, default: '' }, // 岗位
       signature: { type: String, trim: true, default: '' }, // 个性签名

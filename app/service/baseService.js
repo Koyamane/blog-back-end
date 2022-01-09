@@ -35,8 +35,9 @@ class BaseService extends Service {
    * pageSize: 一页多少条
    * sort: 排序 1升序 -1降序
    * filter: 过滤，为空返回全部字段，1显示，0不显示
+   * @param {list => list} cb 回调函数
    */
-  async queryPage(defaultParams = {}) {
+  async queryPage(defaultParams = {}, cb) {
     const { body = {} } = this.ctx.request;
 
     const dto = { ...defaultParams.dto, ...body.dto };
@@ -86,19 +87,15 @@ class BaseService extends Service {
       }
     }
 
-    const data = await this.document.find(dto, filter).sort(sort);
-    const total = data.length;
+    // 总数
+    const total = await this.document.find(dto, filter).count();
 
-    // 为什么不使用 skip 和 limit，这两个方法必须接在 find 后面，但是拿 total 中断了
-    // .skip((current - 1) * pageSize).limit(pageSize);
+    let list = await this.document.find(dto, filter).sort(sort).skip((current - 1) * pageSize)
+      .limit(pageSize);
 
-    const list =
-      pageSize > 0
-        ? data.filter(
-          (item, index) =>
-            index >= (current - 1) * pageSize && index < current * pageSize
-        )
-        : [];
+    if (cb) {
+      list = cb(list);
+    }
 
     return {
       list,

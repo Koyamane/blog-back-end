@@ -9,7 +9,16 @@ class UserService extends BaseService {
   }
 
   async queryBlogPage(defaultParams) {
-    return this.queryPage(defaultParams);
+    const userInfo = await this.ctx.getCurrentUserInfo();
+
+    return this.queryPage(defaultParams, list => {
+
+      return list.map(item => {
+        item.createdAvatar = userInfo.avatar;
+        item.createdName = userInfo.nickname;
+        return item;
+      });
+    });
   }
 
   async addBlog(defaultParams) {
