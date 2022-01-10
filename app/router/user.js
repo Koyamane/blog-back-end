@@ -7,4 +7,5 @@ module.exports = (app, jwt) => {
   app.router.get('/user/api/logOut', jwt, 'user.logOut');
   app.router.put('/user/api/current/update', jwt, 'user.updateCurrent');
   app.router.put('/user/api/current/update/passowrd', jwt, 'user.updateCurrentPassword');
+  app.router.put('/user/api/avatar/update', jwt, 'user.changeAvatar');
 };

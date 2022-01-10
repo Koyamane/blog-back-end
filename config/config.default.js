@@ -79,6 +79,26 @@ module.exports = appInfo => {
     },
   };
 
+  config.multipart = {
+    mode: 'file',
+    // 表单 Field 文件名长度限制
+    // fieldNameSize: 100,
+    // // 表单 Field 内容大小
+    // fieldSize: 500000000000,
+    // // 表单 Field 最大个数
+    // // fields: 10,
+    // // 单个文件大小
+    // fileSize: 500000000000,
+    // // 允许上传的最大文件数
+    // files: 10,
+  };
+
+  // config.bodyParser = {
+  //   jsonLimit: '200mb', // 默认 100kb
+  //   formLimit: '200mb',
+  //   textLimit: '200mb',
+  // };
+
   // add your user config here
   const userConfig = {
     // myAppName: 'egg',

@@ -1,7 +1,13 @@
 'use strict';
 
 const Service = require('egg').Service;
+const fs = require('mz/fs');
 const MyError = require('./myError');
+const cosConfig = require('../../config/cos.config');
+
+const COS = require('cos-nodejs-sdk-v5');
+// 创建实例
+const cos = new COS(cosConfig);
 
 class BaseService extends Service {
   /**
@@ -106,7 +112,7 @@ class BaseService extends Service {
   }
 
   async addSomeone(defaultParams) {
-    const params = { ...defaultParams, ...this.ctx.request.body };
+    const params = { ...defaultParams };
 
     if (!Object.keys(params).length) {
       return Promise.reject(new MyError('不能传空对象', 400));
@@ -117,7 +123,7 @@ class BaseService extends Service {
   }
 
   async deleteSomeone(defaultParams) {
-    const { id } = { ...defaultParams, ...this.ctx.request.body };
+    const { id } = { ...defaultParams };
 
     if (!id) {
       return Promise.reject(new MyError('请传入ID', 400));
@@ -128,7 +134,7 @@ class BaseService extends Service {
   }
 
   async updateSomeone(defaultParams) {
-    const params = { ...defaultParams, ...this.ctx.request.body, updateDate: new Date() };
+    const params = { ...defaultParams, updateDate: new Date() };
 
     if (!params.id) {
       return Promise.reject(new MyError('请传入ID', 400));
@@ -143,13 +149,56 @@ class BaseService extends Service {
   }
 
   async someoneInfo(defaultParams) {
-    const { id } = { ...defaultParams, ...this.ctx.request.query };
+    const { id } = { ...defaultParams };
 
     if (!id) {
       return Promise.reject(new MyError('请传入ID', 400));
     }
 
     return await this.document.findOne({ id }, { _id: 0 });
+  }
+
+  /**
+   * @description 上传单个文件，返回请求参数及文件 url
+   * @param {String} filePrefix 文件存储前缀，例如：avatar/avatar_，avatar目录下的以avatar_开头的文件
+   * @param {String} delFile  删除的文件，例如：avatar/avatar_111111.png
+   * @return { requestBody: any, fileUrl: strng }
+   */
+  async uploadFile(filePrefix, delFile) {
+    const { ctx } = this;
+
+    const file = ctx.request.files[0];
+
+    if (!file) {
+      return '';
+    }
+
+    const fileType = file.mime.split('/')[1];
+    const filename = filePrefix + Date.now() + '.' + fileType || file.filename.toLowerCase();
+
+    // 上传
+    const res = await cos.putObject({
+      Bucket: 'yamanesi-1258339807',
+      Region: 'ap-guangzhou',
+      Key: filename,
+      Body: fs.createReadStream(file.filepath), // 上传文件对象
+    });
+
+    // 需要删除临时文件
+    await fs.unlink(file.filepath);
+
+    const fileUrl = 'https://' + res.Location;
+
+    if (delFile) {
+      // 异步删除，失败了也不要紧
+      cos.deleteObject({
+        Bucket: 'yamanesi-1258339807',
+        Region: 'ap-guangzhou',
+        Key: delFile,
+      });
+    }
+
+    return fileUrl;
   }
 }
 

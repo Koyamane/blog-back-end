@@ -22,9 +22,55 @@ class UserService extends BaseService {
     const { ctx } = this;
 
     const stream = await ctx.getFileStream();
+
     // path.extname(filename) 也能拿到文件后缀
     const fileType = stream.mimeType.split('/')[1];
     const filename = 'avatar/avatar_' + Date.now() + '.' + fileType || stream.filename.toLowerCase();
+
+    let avatarUrl;
+
+    try {
+      // 上传
+      const res = await cos.putObject({
+        Bucket: 'yamanesi-1258339807',
+        Region: 'ap-guangzhou',
+        Key: filename,
+        Body: stream, // 上传文件对象
+      });
+
+      avatarUrl = 'https://' + res.Location;
+      const userInfo = await ctx.getCurrentUserInfo();
+      const preAvatar = userInfo.avatar.split('?')[0].replace(/.*\//, '');
+
+      await this.document.updateOne({ userId: userInfo.userId }, { $set: { avatar: avatarUrl } });
+      // 更新缓存
+      await ctx.service.cache.redis.set(userInfo.userId, { ...userInfo, avatar: avatarUrl });
+
+      if (preAvatar !== 'default_avatar.png') {
+        // 异步删除，失败了也不要紧
+        cos.deleteObject({
+          Bucket: 'yamanesi-1258339807',
+          Region: 'ap-guangzhou',
+          Key: 'avatar/' + preAvatar,
+        });
+      }
+    } catch (err) {
+      // 必须将上传的文件流消费掉，要不然浏览器响应会卡死
+      await sendToWormhole(stream);
+      throw err;
+    }
+
+    return avatarUrl;
+  }
+
+  // 上传文件
+  async uploadFile(filePrefix, delFile) {
+    const { ctx } = this;
+
+    const stream = await ctx.getFileStream();
+
+    const fileType = stream.mimeType.split('/')[1];
+    const filename = filePrefix + Date.now() + '.' + fileType || stream.filename.toLowerCase();
 
     // 上传
     const res = await cos.putObject({
@@ -34,24 +80,18 @@ class UserService extends BaseService {
       Body: stream, // 上传文件对象
     });
 
-    const avatarUrl = 'https://' + res.Location;
-    const userInfo = await ctx.getCurrentUserInfo();
-    const preAvatar = userInfo.avatar.split('?')[0].replace(/.*\//, '');
+    const fileUrl = 'https://' + res.Location;
 
-    await this.document.updateOne({ userId: userInfo.userId }, { $set: { avatar: avatarUrl } });
-    // 更新缓存
-    await ctx.service.cache.redis.set(userInfo.userId, { ...userInfo, avatar: avatarUrl });
-
-    if (preAvatar !== 'default_avatar.png') {
+    if (delFile) {
       // 异步删除，失败了也不要紧
       cos.deleteObject({
         Bucket: 'yamanesi-1258339807',
         Region: 'ap-guangzhou',
-        Key: 'avatar/' + preAvatar,
+        Key: delFile,
       });
     }
 
-    return avatarUrl;
+    return fileUrl;
   }
 
   // 上传多张图片，这里可以上传别的文件，到时候改改

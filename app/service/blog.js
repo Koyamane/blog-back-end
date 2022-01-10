@@ -36,7 +36,13 @@ class UserService extends BaseService {
       return Promise.reject(new MyError('单个标签长度不能大于20', 400));
     }
 
+    params.cover = await this.uploadFile('cover/cover_');
+
+    // tags是数组，但是在formData中会自动用转成字符串并且用都好隔开，要手动转
+    params.tags = params.tags ? params.tags.split(',') : [];
+
     const data = await this.document.create(params);
+
     return {
       id: data.id,
       msg: '新增成功',
@@ -44,7 +50,8 @@ class UserService extends BaseService {
   }
 
   async deleteBlog(defaultParams) {
-    await this.deleteSomeone(defaultParams);
+    const params = { ...defaultParams, ...this.ctx.request.body };
+    await this.deleteSomeone(params);
   }
 
   async updateBlog(defaultParams) {
@@ -66,6 +73,21 @@ class UserService extends BaseService {
       return Promise.reject(new MyError('单个标签长度不能大于20', 400));
     }
 
+    // tags是数组，但是在formData中会自动用转成字符串并且用都好隔开，要手动转
+    params.tags = params.tags ? params.tags.split(',') : [];
+
+    if (!params.cover) {
+      let preUrl;
+      // 存在就说明是字符串，不是 file
+      const blogInfo = await this.someoneInfo({ id: params.id });
+      // 获取前文件路径
+      if (blogInfo.cover) {
+        preUrl = blogInfo.cover.split('?')[0].replace(/.*\//, '');
+      }
+
+      params.cover = await this.uploadFile('cover/cover_', preUrl && ('cover/' + preUrl));
+    }
+
     await this.document.updateOne(
       { id: params.id },
       { $set: params }
@@ -75,7 +97,8 @@ class UserService extends BaseService {
   }
 
   async blogInfo(defaultParams) {
-    const blogInfo = await this.someoneInfo(defaultParams);
+    const params = { ...defaultParams, ...this.ctx.request.query };
+    const blogInfo = await this.someoneInfo(params);
 
     if (!blogInfo) {
       return Promise.reject(new MyError('该博文不存在', 400));

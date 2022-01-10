@@ -183,6 +183,23 @@ class UserService extends BaseService {
     const userInfo = await this.document.findOne(params, { password: 0, _id: 0 });
     return userInfo || {};
   }
+
+  // 用户更换头像
+  async changeAvatar() {
+    const { ctx } = this;
+    const userInfo = await ctx.getCurrentUserInfo();
+    let preAvatar = userInfo.avatar.split('?')[0].replace(/.*\//, '');
+    // 不等于默认头像，就要删除
+    preAvatar = preAvatar !== 'default_avatar.png' ? 'avatar/' + preAvatar : '';
+
+    const avatarUrl = await this.uploadFile('avatar/avatar_', preAvatar);
+
+    await this.document.updateOne({ userId: userInfo.userId }, { $set: { avatar: avatarUrl } });
+    // 更新缓存
+    await ctx.service.cache.redis.set(userInfo.userId, { ...userInfo, avatar: avatarUrl });
+
+    return avatarUrl;
+  }
 }
 
 module.exports = UserService;

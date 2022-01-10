@@ -13,5 +13,4 @@ module.exports = app => {
   router.get('/home/api/crsf', controller.home.crsfKey);
   require('./router/blog')(app, jwt);
   require('./router/user')(app, jwt);
-  require('./router/upload')(app, jwt);
 };

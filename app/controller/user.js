@@ -32,6 +32,12 @@ class BlogController extends Controller {
     const { ctx } = this;
     await ctx.returnService(ctx.service.user.userInfo());
   }
+
+  // 更换头像
+  async changeAvatar() {
+    const { ctx } = this;
+    await ctx.returnService(ctx.service.user.changeAvatar());
+  }
 }
 
 module.exports = BlogController;

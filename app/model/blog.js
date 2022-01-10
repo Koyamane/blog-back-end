@@ -28,7 +28,7 @@ module.exports = app => {
       title: { type: String, default: '' },
       content: { type: String, default: '' },
       mdData: { type: String, default: '' },
-      previewImg: { type: String, default: '' },
+      cover: { type: String, default: '' },
       tags: {
         type: Array,
         validate: arr => {
