@@ -11,14 +11,15 @@ class UserService extends BaseService {
   async queryBlogPage(defaultParams) {
     const userInfo = await this.ctx.getCurrentUserInfo();
 
-    return this.queryPage(defaultParams, list => {
-
+    const cb = userInfo && (list => {
       return list.map(item => {
         item.createdAvatar = userInfo.avatar;
         item.createdName = userInfo.nickname;
         return item;
       });
     });
+
+    return this.queryPage(defaultParams, cb);
   }
 
   async addBlog(defaultParams) {

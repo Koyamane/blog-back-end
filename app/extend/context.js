@@ -6,6 +6,9 @@ module.exports = {
    */
   async getCurrentUserInfo() {
     const token = this.request.header.authorization;
+    if (!token) {
+      return null;
+    }
     const smallUserInfo = this.app.jwt.verify(token.split(' ')[1], this.app.config.jwt.secret);
     const userInfo = await this.service.cache.redis.get(smallUserInfo.userId);
     return userInfo;
