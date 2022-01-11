@@ -1,7 +1,7 @@
 {
-  "name": "ya-ma-ne-si-back-end",
+  "name": "yamanesi_blog_back_end",
   "version": "1.0.0",
-  "description": "山音曦后台",
+  "description": "山音溪后台",
   "private": true,
   "egg": {
     "declarations": true

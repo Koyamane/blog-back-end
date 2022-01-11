@@ -1,6 +1,8 @@
-# 山音曦
+# 山音溪
 
-山音曦博客网站后端项目，基于 [eggjs][egg]
+山音溪博客网站后端项目，基于 [eggjs][egg]
+
+[前端传送门][blog-web-site]
 
 数据库为 mongodb，缓存为 redis，**请都先安装好，不然会报错**
 
@@ -16,8 +18,6 @@ module.exports = {
 };
 
 ```
-
-[前端传送门][blog-web-site]
 
 ### 开发
 
