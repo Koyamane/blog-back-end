@@ -156,6 +156,10 @@ class UserService extends BaseService {
 
     await this.document.updateOne({ userId: userInfo.userId }, { $set: updateData });
 
+    if (updateData.nickname !== userInfo.nickname) {
+      // 改动了昵称，那么，相关博客里面的创建人昵称也要改
+      await ctx.model.Blog.updateMany({ createdId: userInfo.userId }, { $set: { createdName: updateData.nickname } });
+    }
     await ctx.service.cache.redis.set(userInfo.userId, { ...userInfo, ...updateData });
 
     return '修改成功';
@@ -204,6 +208,8 @@ class UserService extends BaseService {
     const avatarUrl = await this.uploadFile('avatar/avatar_', preAvatar);
 
     await this.document.updateOne({ userId: userInfo.userId }, { $set: { avatar: avatarUrl } });
+    // 把相关博客的头像都改了
+    await ctx.model.Blog.updateMany({ createdId: userInfo.userId }, { $set: { createdAvatar: avatarUrl } });
     // 更新缓存
     await ctx.service.cache.redis.set(userInfo.userId, { ...userInfo, avatar: avatarUrl });
 
