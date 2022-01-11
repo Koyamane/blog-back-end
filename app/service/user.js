@@ -21,28 +21,37 @@ class UserService extends BaseService {
       return Promise.reject(new MyError('密码未传', 400));
     }
 
-    const userInfo = await this.document.findOne({ username: params.username, password: params.password }, { password: 0, _id: 0 });
+    const userInfo = await this.document.findOne({ username: params.username }, { _id: 0 });
 
     if (!userInfo) {
-      return Promise.reject(new MyError('用户名或密码错误', 400));
+      return Promise.reject(new MyError('该用户不存在', 400));
     }
 
+    if (userInfo.password !== params.password) {
+      return Promise.reject(new MyError('密码不正确', 400));
+    }
+
+    // 前端不需要password
+    const userInfo2 = JSON.parse(JSON.stringify(userInfo));
+    userInfo2.password = undefined;
+    delete userInfo2.password;
+
     const token = app.jwt.sign(
-      { userId: userInfo.userId },
+      { userId: userInfo2.userId },
       app.config.jwt.secret
     );
 
     // 以用户名存好，并设置好过期时间
-    await ctx.service.cache.redis.set(userInfo.userId, userInfo, app.config.session.maxAge);
+    await ctx.service.cache.redis.set(userInfo2.userId, userInfo2, app.config.session.maxAge);
 
     // 如果用户勾选了 `记住我`，设置 30 天的过期时间
     if (params.rememberMe) {
-      await ctx.service.cache.redis.set('userInfo', userInfo, 1000 * 60 * 60 * 24 * 30);
+      await ctx.service.cache.redis.set(userInfo2.userId, userInfo2, 1000 * 60 * 60 * 24 * 30);
     }
 
     return {
       token,
-      userInfo,
+      userInfo: userInfo2,
     };
   }
 
